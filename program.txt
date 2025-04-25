@@ -1,138 +1,97 @@
-SAMPLING AND RECONSTRUCTION OF LOW PASS SIGNALS. DISPLAY THE SIGNALS AND ITS SPECTRUMS
-clc;
-clear all;
-t=-5:0.0001:5;
-f1=10;
-% Continuous time Signal
-x=cos(2*pi*f1*t);
-figure(1)
-plot(t,x)
-axis([-0.5 0.5 -2 2])
-xlabel('time');
-ylabel('amplitude')
-title('continuous time signal');
-% Discrete time Signal: Under Sampling Condition fs<2fm
-fs1=0.5*f1;
-ts1=1/fs1;
-n1=-0.5:ts1:0.5;
-xs1=cos(2*pi*f1*n1);
-figure(2)
-stem(n1,xs1)
-axis([-0.5 0.5 -2 2])
-hold on;
-plot(t,x,'r');
-hold off
-xlabel('time sample');
-ylabel('Amplitude');
-title('Discrete time signal sampling rate fs<2*fmax');
-% Discrete time Signal: Nyquist Sampling Condition fs=2fm
-fs2=2*f1;
-ts2=1/fs2;
-n2=-0.5:ts2:0.5;
-xs2=cos(2*pi*f1*n2);
-figure(3)
-stem(n2,xs2)
-axis([-0.5 0.5 -2 2])
-hold on;
-plot(t,x,'r');
-hold off
-xlabel('time sample');
-ylabel('Amplitude');
-title('Discrete time signal sampling rate fs=2*fmax');
-% Discrete time Signal: Over Sampling Condition fs>2fm
-fs3=20*f1;
-ts3=1/fs3;
-n3=-0.5:ts3:0.5;
-xs3=cos(2*pi*f1*n3);
-figure(4)
-stem(n3,xs3)
-axis([-0.5 0.5 -2 2])
-hold on;
-plot(t,x,'r');
-hold off
-xlabel('time sample');
-ylabel('Amplitude');
-title('Discrete time signal sampling rate fs>2*fmax');
-% Reconstruction of Original signal
-n11=-0.5:(1/fs3):0.5;
-r1=interp1(n3,xs3,n11);
-[b a] = butter(3,0.002);
-out= filter(b,a,r1);
-figure(5)
-axis([-0.5 0.5 -2 2])
-hold on;
-plot(n11,r1,'r');
-hold off
-xlabel('time sample');
-ylabel('Amplitude');
-title('Reconstructed signal');
+Implement frequency response of a lead lag compensator.
+%lag network
+clc;clear all;close all;
+T=input('enter the value of time constant');
+beta=input('enter the value of the beta(should be >1)');
+n=[1 1/T];
+d=[1 1/(beta*T)];
+figure,freqs(n,d);
+title('Frequency response in s domain Lag compensator N/w')
+grid on;
+%lead network
+clc;clear all;close all;
+T=input('enter the value of time constant');
+alpha=input('enter the value of the alpha(should be <1)');
+n=[1 1/T];
+d=[1 1/(alpha*T)];
+figure,freqs(n,d);
+grid on;
+%lead-lag network
+T1=input('enter the value of time constant');
+T2=input('enter the value of time constant');
+alpha=input('enter the value of alpha constant');
+beta=input('enter the value of beta constant');
+n1=[1 1/T1];
+n2=[1 1/T2];
+n=conv(n1,n2);
+d1=[1 1/(alpha*T1)];
+d2=[1 1/(beta*T2)];
+d=conv(d1,d2);
+figure,freqs(n,d);
+grid on;
 
-
-
-
-
-TIME DIVISION MULTIPLEXING AND DEMULTIPLEXING.
-clc;
-close all;
-clear;
-% Signal generation
-t =0:.5:4*pi; % Signal taken upto 4pi
-sig1=8*sin(t); % Generate first signal
-l1=length(sig1);
-sig2=8*triang(l1); % Generate Second Signal
-% Perform time division multiplexing
-for i=1:l1
-sig(1,i)= sig1(i); % Making both row vector to a matrix
-%sig[(F1,S1) (F2,S2) (F3,S3).....]
-sig(2,i)= sig2(i);
+Analyze the stability of the given system using Routh stability criterion
+%Stability check using Routh Stability criterion
+clc;clear all;close all;%[1 1 3 1 6]
+e=input('Enter the coeff of characteristic equation');
+le=length(e);
+m=mod(le,2);
+a=[];
+b=[];
+if m==0
+for i=1:(le/2)
+a(i)=e((2*i)-1);
+b(i)=e(2*i);
 end
-tdmsig=reshape(sig,1,2*l1); % TDM of both quantize signal
-% Perform Demultiplexing
-demux=reshape(tdmsig,2,l1);
-for i=1:l1
-demultdm1(i)=demux(1,i); % Converting The matrix into row vectors
-demultdm2(i)=demux(2,i);
+else
+e1=[e 0];
+for i=1:((le+1)/2)
+a(i)=e1((2*i)-1);
+b(i)=e1(2*i);
 end
-figure(1);
-% Display First Signal
-subplot(2,2,1);
-plot(sig1);
-title('Sinusoidal Signal');
-ylabel('Amplitude--->');
-xlabel('Time--->');
-% Display Second signal
-subplot(2,2,2);
-plot(sig2);
-title('Triangular Signal');
-ylabel('Amplitude--->');
-xlabel('Time--->');
-% Display Sampled version of First Signal
-subplot(2,2,3);
-stem(sig1);
-title('Sampled Sinusoidal Signal');
-ylabel('Amplitude--->');
-xlabel('Time--->');
-% Display Sampled version of Second Signal
-subplot(2,2,4);
-stem(sig2);
-title('Sampled Triangular Signal');
-ylabel('Amplitude--->');
-xlabel('Time--->');
-figure(2);
-% Display TDM SIgnal
-subplot (3,1,1);
-stem(tdmsig);
-title('TDM Signal');
-ylabel('Amplitude--->');
-xlabel('Time--->');
-% Display of demultiplexed signal
-subplot(3,1,2);
-plot(demultdm1);
-title('Recovered Sinusoidal Signal');
-ylabel('Amplitude--->');
-xlabel('Time--->');
-subplot(3,1,3);
-plot(demultdm2);
-title('Recovered Triangular Signal');
-ylabel('Amplitude--->');
-xlabel('Time--->');
+end
+%remaining rows
+l1=length(a);
+c=[];
+c(1,:)=a;
+c(2,:)=b;
+for m=3:le
+for n=1:l1-1
+c(m,n)= -(1/c(m-1,1))*det([c((m-2),1) c((m-2),(n+1));c((m-1),1) c((m-1),(n+1))]);
+end
+end
+disp('The Routh matrix ');
+disp(c)
+if c(:,1)>0
+disp('System is stable')
+else
+disp('System is unstable')
+end
+
+Analyze the stability of the system using Root-Locus
+%Root Locus
+%open loop transfer function G(s) = K/s(s+2)(s+4)
+num=input('enter the value of Numerator=');
+den=input('enter the value of Denominator=');
+sys=tf(num,den);
+rlocus(sys);
+rlocfind(sys);
+
+
+Analyze the stability of the given system using Bode plots
+%Stability check using Bode plot
+clc;clear all;close all;
+nr=[10];
+dr=[0.04,0.5,1,0];
+sys=tf(nr,dr);
+bode(sys);
+margin(sys);
+[gm,pm,wgc,wpc]=margin(sys);
+
+Analyze the stability of the given system using Nyquist plot
+%Stability check using Nyquist plot
+clc;clear all;close all;
+nr=[50];
+dr=[1,3,2];
+sys=tf(nr,dr);
+nyquist(sys);
