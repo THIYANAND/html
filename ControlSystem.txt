@@ -1,0 +1,271 @@
+Implement Block diagram reduction technique to obtain transfer function of a control systems.
+clc;close all;
+nr1=4;%nr coeff of first sub system
+dr1=[1,2,1];%dr coeff of first sub system
+tf1=tf(nr1,dr1);
+display(tf1);
+nr2=1;%nr coeff of second sub system
+dr2=[1,2];%dr coeff of second sub system
+tf2=tf(nr2,dr2);
+display(tf2);
+tfs=series(tf1,tf2); %TF of cascaded system
+tfp=parallel(tf1,tf2);%TF of parallel system
+tffb=feedback(tf1,tf2); %TF of feedback system
+display(tfs);
+display(tfp);
+display(tffb);
+
+Implement Signal Flow graph to obtain transfer function of a control system.
+clc;clear all;close all;
+g12=input('enter the gain between node 1 and node 2');
+g23=input('enter the gain between node 2 and node 3');
+g34=input('enter the gain between node 3 and node 4');
+g45=input('enter the gain between node 4 and node 5');
+g56=input('enter the gain between node 5 and node 6');
+g67=input('enter the gain between node 6 and node 7');
+g78=input('enter the gain between node 7 and node 8');
+g25=input('enter the gain between node 2 and node 5');
+p1=g12*g23*g34*g45*g56*g67*g78;
+p2=g12*g25*g56*g67*g78;
+g343=input('enter the loop gain b/w node 3->4->3');
+g343=g34*g343;
+g3453=input('enter the loop gain b/w node 3->4->5->3');
+g3453=g34*g45*g3453;
+g676=input('enter the loop gain b/w node 6->7->6');
+g676=g67*g676;
+p11=g343*g676;
+p12=g3453*g676;
+delta= 1- sum([g343,g3453,g676])+sum([p11,p12]);
+delta1=1;
+delta2=1-g343;
+T=(1/delta)*(p1*delta1 + p2*delta2);
+display(T);
+Simulation of poles and zeros of a transfer function.
+clc;clear all;close all;
+nr1=[1,2]; %(s+2)/(s^2+2*s+1)
+dr1=[1,2,1];
+tf1=tf(nr1,dr1);
+display(tf1);
+pzmap(tf1);
+grid on;
+
+Implement time response specification of a second order Under damped System, for different damping factors.
+clc;clear all;close all;
+zeta1=0.1;
+zeta2=0.4;
+zeta3=0.6;
+zeta4=0.8;
+wn=1;
+t=0:0.1:16;
+phi1=atan((sqrt(1-zeta1.^2))/(zeta1));
+phi2=atan((sqrt(1-zeta2.^2))/(zeta2));
+phi3=atan((sqrt(1-zeta3.^2))/(zeta3));
+phi4=atan((sqrt(1-zeta4.^2))/(zeta4));
+c1= 1 - ((1/sqrt(1-zeta1.^2)).*(exp(-zeta1*wn*t)).*(sin(wn*t*sqrt(1-zeta1.^2)-phi1)));
+c2= 1 - ((1/sqrt(1-zeta2.^2)).*(exp(-zeta2*wn*t)).*(sin(wn*t*sqrt(1-zeta2.^2)-phi2)));
+c3= 1 - ((1/sqrt(1-zeta3.^2)).*(exp(-zeta3*wn*t)).*(sin(wn*t*sqrt(1-zeta3.^2)-phi3)));
+c4= 1 - ((1/sqrt(1-zeta4.^2)).*(exp(-zeta4*wn*t)).*(sin(wn*t*sqrt(1-zeta4.^2)-phi4)));
+plot(t,c1,t,c2,t,c3,t,c4);
+legend('zeta1=0.1','zeta2=0.4','zeta3=0.6','zeta4=0.8');
+xlabel('time(t)-->');
+ylabel('amplitude(c(t))-->');
+title('Time response of second order under-damped system with different damping ratio');
+
+Implement frequency response of a second order System.
+clc;clear all;close all;
+W=0:0.1:5;
+S=1i*W;
+Wn=1;%natural freq Wn=1
+zeta=1;%critically damped zeta=1
+H= (Wn^2)./((S.^2)+(2*Wn*zeta*S)+(Wn.^2)); %TF of closed loop second order system
+subplot(2,1,1);
+plot(W,abs(H)) ;
+xlabel('w -->');
+ylabel('|H(jw|-->');
+title('Magnitude response of second order system');
+subplot(2,1,2);
+plot(W,angle(H));
+xlabel('w -->');
+ylabel('<H(jw|-->');
+title('Phase response of second order system');
+
+Implement frequency response of a lead lag compensator.
+%lag network
+clc;clear all;close all;
+T=input('enter the value of time constant');
+beta=input('enter the value of the beta(should be >1)');
+n=[1 1/T];
+d=[1 1/(beta*T)];
+figure,freqs(n,d);
+title('Frequency response in s domain Lag compensator N/w')
+grid on;
+%lead network
+clc;clear all;close all;
+T=input('enter the value of time constant');
+alpha=input('enter the value of the alpha(should be <1)');
+n=[1 1/T];
+d=[1 1/(alpha*T)];
+figure,freqs(n,d);
+grid on;
+%lead-lag network
+T1=input('enter the value of time constant');
+T2=input('enter the value of time constant');
+alpha=input('enter the value of alpha constant');
+beta=input('enter the value of beta constant');
+n1=[1 1/T1];
+n2=[1 1/T2];
+n=conv(n1,n2);
+d1=[1 1/(alpha*T1)];
+d2=[1 1/(beta*T2)];
+d=conv(d1,d2);
+figure,freqs(n,d);
+grid on;
+
+Analyze the stability of the given system using Routh stability criterion
+clc;clear all;close all;
+e=input('Enter the coeff of characteristic equation'); %input = [1 1 3 1 6]
+le=length(e);
+m=mod(le,2);
+a=[];
+b=[];
+if m==0
+for i=1:(le/2)
+a(i)=e((2*i)-1);
+b(i)=e(2*i);
+end
+else
+e1=[e 0];
+for i=1:((le+1)/2)
+a(i)=e1((2*i)-1);
+b(i)=e1(2*i);
+end
+end
+%remaining rows
+l1=length(a);
+c=[];
+c(1,:)=a;
+c(2,:)=b;
+for m=3:le
+for n=1:l1-1
+c(m,n)= -(1/c(m-1,1))*det([c((m-2),1) c((m-2),(n+1));c((m-1),1) c((m-1),(n+1))]);
+end
+end
+disp('The Routh matrix ');
+disp(c)
+if c(:,1)>0
+disp('System is stable')
+else
+disp('System is unstable')
+end
+
+Analyze the stability of the system using Root-Locus.
+clc;clear all;close all;
+num=input('enter the value of Numerator='); %input = 1
+den=input('enter the value of Denominator='); %input = [1 6 8 0]
+sys=tf(num,den);
+rlocus(sys);
+rlocfind(sys);
+Analyze the stability of the given system using Bode plots.
+clc;clear all;close all;
+nr=[10];
+dr=[0.04,0.5,1,0];
+sys=tf(nr,dr);
+bode(sys);
+margin(sys);
+[gm,pm,wgc,wpc]=margin(sys);
+
+Analyze the stability of the given system using Nyquist plot.
+clc;clear all;close all;
+nr=[50];
+dr=[1,3,2];
+sys=tf(nr,dr);
+nyquist(sys);
+
+Obtain the time response from state model of a system.
+%Convert transfer function to state model
+nr=[1,1];
+dr=[1,2,1];
+tf1=tf(nr,dr);
+[A,B,C,D]=tf2ss(nr,dr);
+display(A);
+display(B);
+display(C);
+display(D);
+%Convert state model to transfer function
+clc;clear all;close all;
+A=[-2,-1;1,0];
+B=[1;0];
+C=[1,1];
+D=[0];
+[b,a]=ss2tf(A,B,C,D);
+tf1=tf(b,a);
+s=tf('s');
+M=(b(1)*s^2 + b(2)*s + b(3))/(a(1)*s^2 + a(2)*s + a(3));
+t=0:0.005:20;
+c=impulse(M,t);
+plot(t,c);
+
+Implement PI and PD controllers.
+clc; close all; clear all;
+s=tf('s');
+%Open loop TF of G(s) = 1/s(s+1) kp=100, ki=10, kd=0.01
+M1= 1/(s^2 + s + 1);
+t=0:0.005:20;
+s1=step(M1,t);
+plot(t,s1);
+hold on;
+%closed loop TF of PD controller
+M2= (100+0.01*s)/(s^2 + 1.01*s + 100);
+s2=step(M2,t);
+plot(t,s2);
+hold on;
+%closed loop TF of PI controller
+M3= (100*s + 10)/(s^3 + s^2 + 100*s + 10);
+s3=step(M3,t);
+plot(t,s3);
+hold on;
+
+Implement PID controllers.
+%Effect of PID controllers on second order system with unit step function
+clc;
+s=tf('s');
+%Open loop TF of G(s) = 1/s(s+1) kp=100, ki=10, kd=0.01
+M1= 1/(s^2 + s + 1);
+t=0:0.005:20;
+s1=step(M1,t);
+plot(t,s1);
+hold on;
+%closed loop TF of PID controller
+M2= (100+0.01*s)/(s^2 + 1.01*s + 100);
+s2=step(M2,t);
+plot(t,s2);
+hold on;
+
+Demonstrate the effect of PI, PD and PID controller on the system response.
+%Effect of PI,PD and PID controllers on second order systems
+clc;
+s=tf('s');
+%closed loop TF of G(s) = 1/s(s+1)
+M1= 1/(s^2 + s + 1);
+t=0:0.005:20;
+s1=impulse(M1,t);
+plot(t,s1);
+xlabel('time-->');
+ylabel('Impulse response-->');
+hold on;
+%closed loop TF of PD controller
+M2= (100+0.01*s)/(s^2 + 1.01*s + 100);
+s2=impulse(M2,t);
+plot(t,s2);
+hold on;
+%closed loop TF of PI controller
+M3= (100*s + 10)/(s^3 + s^2 + 100*s + 10);
+s3=impulse(M3,t);
+plot(t,s3);
+hold on;
+%closed loop TF of PID controller
+M4= (0.01*s^2 + 100*s +10)/(s^3 + 1.01*s^2 + 100*s + 10);
+s4=impulse(M4,t);
+plot(t,s4);
+hold on;
+legend('No Controller','PD controller','PI controller','PID controller');
