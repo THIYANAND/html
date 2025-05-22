@@ -1,0 +1,328 @@
+BASIC SIGNALS AND SIGNAL GRAPHING: A) UNIT STEP, B)RECTANGULAR,C) STANDARD TRIANGLE D) SINUSOIDAL AND E) EXPONENTIAL SIGNAL.
+%Generating a unit step sequence
+clc;clear all;close all;
+t1=-10:0.01:0;
+t2=0:0.01:20;
+t=[t1 t2];
+x1=zeros(size(t1));
+x2=ones(size(t2));
+x=[x1 x2];
+subplot(5,1,1);
+plot(t,x);
+axis([-10 20 0 2]);
+xlabel('n'),ylabel('x(n)');
+title('Unit Step Sequence');
+% generate rectangular pulse
+t3=0:0.01:10;
+t4=10:0.01:20;
+rec=[t1 t3 t4];
+x1=zeros(size(t1));
+x3=ones(size(t3));
+x4=zeros(size(t4));
+x5 = [x1 x3 x4];
+subplot(5,1,2)
+plot(rec,x5);
+axis([-10 20 0 2]);
+xlabel('Time');ylabel('Amplitude');
+title('rectangular Sequence');
+% generate triangular signal
+T = 10*(1/50);
+fss = 1000;
+tt = 0:1/fss:T-1/fss;
+xxx = sawtooth(2*pi*50*tt,1/2);
+subplot(5,1,3);
+plot(tt,xxx);
+xlabel('Time');ylabel('Amplitude');
+title('Triangular');
+grid on
+% Generation of a sinusoidal sequence Fs=1000; f=50; %not need can include in next upcoming linetn=[0:100]; xx=sin(2*pi*f*tn/Fs); subplot(5,1,4); plot(tn,xx); title('Sinusoidal Sequence'); xlabel('samples'); ylabel('Amplitude'); grid; %Generation of a real exponential sequence n = 0:35; a = 1.2; K = 0.2; xn = K*a.^n; subplot(5,1,5); plot(n,xn); title('Exponential Sequence'); xlabel('Time index n'); ylabel('Amplitude'); ILLUSTRATION OF SIGNAL REPRESENTATION IN TIME AND FREQUENCY DOMAINS FOR A RECTANGULAR PULSE. clc; clear all; close all;
+T = 20; % Pulse width parameter
+dt = 0.001; % Time step
+t = [-(10+T):dt:(10+T)]; % Time vector
+x = sign(t+T) - sign(t-T); % Generate rectangular pulse using signfunctions
+subplot(2,1,1); plot(t,x); % Plot pulse signal
+title('Pulse signal'); xlabel('Time (msec)'); ylabel('Signal f(t)');
+axis([-(30+T) (30+T) 0 3]); % Set axis limits for time-domain plot
+y = fftshift(fft(x)); % Compute FFT and shift zero-frequency to center
+N = length(y); % Number of FFT points
+n = -(N-1)/2:(N-1)/2; % Frequency index vector (not frequency in Hz)
+mag = sqrt(y.*conj(y)); % Magnitude spectrum calculation
+subplot(2,1,2); plot(n,mag); % Plot frequency spectrum
+title('Frequency spectrum amplitude for the rectangular pulse');
+xlabel('Frequency (Hz)'); ylabel('Frequency spectrum amplitude');
+axis([-50 50 0 70000]); % Limit frequency axis for better visibility
+AMPLITUDE MODULATION AND DEMODULATION: GENERATION AND DISPLAY THE RELEVANT SIGNALS AND ITS SPECTRUM. clc; clear; close all; % Parameters fm = 20; fc = 500; mu = 1; t = 0:0.00001:0.0999;
+% Signals
+Vm = sin(2*pi*fm*t); % Modulating signal
+Vc = sin(2*pi*fc*t); % Carrier
+Vam = (1 + mu * Vm) .* Vc; % AM signal
+Vr = Vam .* Vc; % Coherent detection
+% Frequency spectrum of AM
+Vf = abs(fft(Vam, 10000)) / 500;
+% Low-pass filter for demodulation
+[b, a] = butter(3, 0.002);
+out = filter(b, a, Vr);
+% Envelope curves
+upper_env = 1 + mu * Vm;
+lower_env = -upper_env;
+% Figure 1: Modulating and Carrier signals
+figure(1);
+subplot(2,1,1);
+plot(t, Vm);
+title('Modulating Signal');
+xlabel('Time'); ylabel('Amplitude');
+grid on;
+subplot(2,1,2);
+plot(t, Vc);
+title('Carrier Signal');
+xlabel('Time'); ylabel('Amplitude');
+grid on;
+% Figure 2: AM signal with envelope + spectrum
+figure(2);
+subplot(2,1,1);
+plot(t, Vam);
+hold on;
+plot(t, upper_env, 'r', t, lower_env, 'r'); % Red envelope lines
+title('AM Signal (Time Domain)');
+xlabel('Time'); ylabel('Amplitude');
+grid on;
+subplot(2,1,2);
+plot((0:9999)*10, Vf);
+title('AM Signal (Frequency Domain)');
+xlabel('Frequency (Hz)'); ylabel('Amplitude');
+grid on;
+xlim([fc-6*fm fc+6*fm]);
+% Figure 3: Demodulated signal
+figure(3);
+plot(t, 1.81*out);
+title('Demodulated Signal');
+xlabel('Time'); ylabel('Amplitude');
+grid on;
+FREQUENCY MODULATION AND DEMODULATION: GENERATION AND
+DISPLAY THE RELEVANT SIGNALS AND ITS SPECTRUMS.
+vc=1;
+vm=1;
+fm=250;
+fc=5000;
+m=10;
+kf=100;
+t=0:0.00001:0.09999;
+f=0:10:99990;
+carrier=vc*cos(2*pi*fc*t);
+message=vm*cos(2*pi*fm*t);
+FM=vc*cos((2*pi*fc*t)+10*sin(2*pi*fm*t));
+dem=(1/2*pi*10)*diff(10*sin(2*pi*fm*t))/0.2;
+vf=(fft(FM,10^4))/500;
+figure(1);
+subplot(211);plot(t,message);
+xlabel('Time');ylabel('Amplitude');
+title('FM modulating signal');
+grid on
+subplot(212);plot(t,carrier);
+xlabel('Time');ylabel('Amplitude')
+axis([0 0.01 -1.5 1.5]);
+title('FM carrier signal');
+grid on;
+figure(2);
+subplot(211);plot(t,FM);
+hold on;
+plot(t,message,'r');
+axis([0 0.01 -1.5 1.5]);
+xlabel('time(second)'),ylabel('amplitude');
+title('FM time-domain');grid
+grid on;
+subplot(212)
+plot(f,vf);
+axis([ 0 10^4 0 4]);
+xlabel('frequency'), ylabel('amplitude');
+title('FM frequency-domain');
+grid on;
+figure(3)
+plot(dem)
+xlabel('Time'),ylabel('amplitude');
+title('FM Demodulated signal');
+grid on;
+SAMPLING AND RECONSTRUCTION OF LOW PASS SIGNALS. DISPLAY
+THE SIGNALS AND ITS SPECTRUMS
+clc; clear all;
+f1 = 10;
+t = -0.5:0.0001:0.5;
+x = cos(2*pi*f1*t);
+figure(1); plot(t,x); title('Continuous Signal');
+% Under-sampling (fs < 2*f1)
+fs1 = 5;
+n1 = -0.5:1/fs1:0.5;
+figure(2);
+stem(n1, cos(2*pi*f1*n1));
+hold on; plot(t,x,'r');
+title('Under-sampling');
+% Nyquist rate (fs = 2*f1)
+fs2 = 20;
+n2 = -0.5:1/fs2:0.5;
+figure(3);
+stem(n2, cos(2*pi*f1*n2));
+hold on; plot(t,x,'r');
+title('Nyquist Sampling');
+% Over-sampling (fs > 2*f1)
+fs3 = 200;
+n3 = -0.5:1/fs3:0.5;
+xs3 = cos(2*pi*f1*n3);
+figure(4);
+stem(n3,xs3);
+hold on;
+plot(t,x,'r');
+title('Over-sampling');
+% Signal Reconstruction
+r = interp1(n3, xs3, n3, 'linear');
+[b,a] = butter(3,0.002);
+y = filter(b,a,r);
+figure(5);
+plot(n3,y,'b',n3,r,'r');
+title('Reconstructed Signal');
+TIME DIVISION MULTIPLEXING AND DEMULTIPLEXING.
+clc;close all;clear;
+t =0:.5:4*pi;
+sig1=8*sin(t);
+l1=length(sig1);
+sig2=8*triang(l1);
+for i=1:l1
+sig(1,i)= sig1(i);
+sig(2,i)= sig2(i);
+end
+tdmsig=reshape(sig,1,2*l1);
+demux=reshape(tdmsig,2,l1);
+for i=1:l1
+demultdm1(i)=demux(1,i);
+demultdm2(i)=demux(2,i);
+end
+figure(1);
+% Display First Signal
+subplot(2,2,1);
+plot(sig1);
+title('Sinusoidal Signal');
+ylabel('Amplitude--->');
+xlabel('Time--->');
+% Display Second signal
+subplot(2,2,2);
+plot(sig2);
+title('Triangular Signal');
+ylabel('Amplitude--->');
+xlabel('Time--->');
+% Display Sampled version of First Signal
+subplot(2,2,3);
+stem(sig1);
+title('Sampled Sinusoidal Signal');
+ylabel('Amplitude--->');
+xlabel('Time--->');
+% Display Sampled version of Second Signal
+subplot(2,2,4);
+stem(sig2);
+title('Sampled Triangular Signal');
+ylabel('Amplitude--->');
+xlabel('Time--->');
+figure(2);
+% Display TDM Signal
+subplot (3,1,1);
+stem(tdmsig);
+title('TDM Signal');
+ylabel('Amplitude--->');
+xlabel('Time--->');
+% Display of demultiplexed signal
+subplot(3,1,2);
+plot(demultdm1);
+title('Recovered Sinusoidal Signal');
+ylabel('Amplitude--->');
+xlabel('Time--->');
+subplot(3,1,3);
+plot(demultdm2);
+title('Recovered Triangular Signal');
+ylabel('Amplitude--->');
+xlabel('Time--->');
+PCM ILLUSTRATION: SAMPLING, QUANTIZATION AND ENCODING.
+clc; close all; clear;
+% Inputs
+n = input('Enter n value for n-bit PCM system: ');
+n1 = input('Enter number of samples in a period: ');
+% Signal generation
+L = 2^n;
+x = 0:2*pi/n1:4*pi;
+s = 8*sin(x);
+% Plot original analog and sampled signal
+subplot(3,1,1); plot(s); title('Analog Signal');
+ylabel('Amplitude'); xlabel('Time');
+subplot(3,1,2); stem(s); grid on;
+title('Sampled Signal');
+ylabel('Amplitude'); xlabel('Time');
+% Quantization
+vmax = 8; vmin = -vmax;
+del = (vmax - vmin) / L;
+part = vmin:del:vmax;
+code = vmin - del/2 : del : vmax + del/2;
+[ind, q] = quantiz(s, part, code);
+% Adjust indices and values
+ind(ind > 0) = ind(ind > 0) - 1;
+q(q == vmin - del/2) = vmin + del/2;
+subplot(3,1,3); stem(q); grid on;
+title('Quantized Signal');
+ylabel('Amplitude'); xlabel('Time');
+% Encoding
+code_bin = de2bi(ind, n, 'left-msb');
+coded = reshape(code_bin', 1, []);
+figure;
+subplot(2,1,1); stairs(coded); grid on;
+axis([0 min(100, length(coded)) -1 2]);
+title('Encoded Signal');
+ylabel('Amplitude'); xlabel('Bit Index');
+GENERATE A)NRZ, RZ AND RAISED COSINE PULSE, B) GENERATE AND
+PLOT EYE DIAGRAM.
+clc; clear all; close all;
+% Generate random bipolar data
+data = sign(randn(1,400));
+T = 64; % Symbol period
+Td = 32; % Eye diagram span
+% Upsample data (impulse train)
+dataup = upsample(data, T);
+% RZ: Return-to-Zero polar signal
+yrz = conv(dataup, [zeros(1,T/4), ones(1,T/2), zeros(1,T/4)]);
+yrz = yrz(1:end-T+1);
+% NRZ: Non-Return-to-Zero polar signal
+ynrz = conv(dataup, ones(1,T));
+ynrz = ynrz(1:end-T+1);
+% Half-sine polar signal
+ysine = conv(dataup, sin(pi*(0:T-1)/T));
+ysine = ysine(1:end-T+1);
+% Raised-Cosine pulse shaping, roll-off = 0.5
+rc_pulse = rcosfir(0.5, Td, T, 1, 'normal');
+yrcos = conv(dataup, rc_pulse);
+yrcos = yrcos(2*Td*T:end-2*Td*T+1);
+% Eye Diagrams
+eyediagram(yrz, T, T, T/2);
+title('RZ Eye Diagram');
+ylim([-1.5 1.5]);
+xlim([-Td-2 Td+2]);
+grid on;
+eyediagram(ynrz, T, T, T/2);
+title('NRZ Eye Diagram');
+ylim([-1.5 1.5]);
+xlim([-Td-2 Td+2]);
+grid on;
+eyediagram(ysine, T, T, T/2);
+title('Half-Sine Eye Diagram');
+ylim([-1.5 1.5]);
+xlim([-Td-2 Td+2]);
+grid on;
+eyediagram(yrcos, 2*T, T);
+title('Raised-Cosine Eye Diagram');
+ylim([-1.5 1.5]);
+xlim([-Td-2 Td+2]);
+grid on;
+GENERATE THE PROBABILITY DENSITY FUNCTION OF GAUSSIAN
+DISTRIBUTION FUNCTION.
+clc;clear all;close all;
+x=linspace(-5,5,1000);
+ymu=0;
+ysigma=1;
+p=normpdf(x,ymu,ysigma);
+plot(x,p); %If needed stem can be used for same graph in observation
+title(' gaussian distribution');
+xlabel('x'),ylabel('f(x)');
